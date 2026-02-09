@@ -32,19 +32,15 @@ borehole_diameter = st.sidebar.number_input("Borehole Diameter (m)", value=0.25)
 density = st.sidebar.number_input("Density (kg/m³)", value=1600.0)
 vod = st.sidebar.number_input("VOD (m/s)", value=4000.0)
 
-# --- 新增：起爆点选择 (Detonation Point) ---
-det_location = st.sidebar.selectbox(
-    "Detonation Point", 
-    ["Bottom (0m)", "Top (Charge Length)", "Middle"]
+# --- 修正：Detonation Point 为数值输入 ---
+det_point = st.sidebar.number_input(
+    "Detonation Point (m from bottom)", 
+    min_value=0.0, 
+    max_value=charge_length, 
+    value=0.0, 
+    step=0.5,
+    help="Distance from the bottom of the charge (0 = Bottom initiation)."
 )
-
-# 根据选择计算 det_point 数值
-if "Bottom" in det_location:
-    det_point = 0.0
-elif "Top" in det_location:
-    det_point = float(charge_length)
-else:
-    det_point = float(charge_length) / 2.0
 
 # 计算依赖参数
 Hole_length = charge_length + stemming
@@ -136,8 +132,8 @@ def run_simulation():
     PPV_final = []  
     
     total_points = len(xvalues) * len(yvalues)
-    current_point = 0
-
+    
+    # 简单的进度计算器
     for xi, x in enumerate(xvalues):
         # Update progress bar
         progress_perc = int((xi / len(xvalues)) * 100)
@@ -174,7 +170,7 @@ def run_simulation():
     PPV_all = PPV_final + [[-x, y, v] for x, y, v in PPV_final if x != 0]
 
     # ==========================================
-    # 6. 绘图 (Plotting) - 添加了 Colorbar
+    # 6. 绘图 (Plotting) - 保留 Colorbar
     # ==========================================
     x_array = np.array([row[0] for row in PPV_all])
     y_array = np.array([row[1] for row in PPV_all])
@@ -199,7 +195,7 @@ def run_simulation():
     # --- 核心绘图 ---
     contour = ax.contourf(x_grid, y_grid, np.clip(ppv_grid, 0, 10000), levels=levels, cmap='jet', antialiased=True)
     
-    # --- 新增：添加 Colorbar ---
+    # --- 添加 Colorbar ---
     cbar = fig.colorbar(contour, ax=ax, fraction=0.046, pad=0.04)
     cbar.set_label('PPV (mm/s)', rotation=270, labelpad=15)
 
@@ -258,4 +254,4 @@ def run_simulation():
 if st.button("Run Simulation", type="primary"):
     run_simulation()
 else:
-    st.info("Select parameters on the left and click 'Run Simulation'.")
+    st.info("Adjust parameters on the left and click 'Run Simulation'.")
