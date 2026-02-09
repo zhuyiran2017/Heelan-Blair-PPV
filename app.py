@@ -67,7 +67,7 @@ def run_simulation():
     # --- Time parameters ---
     t_det_up = (charge_length - det_point) / vod
     t_det_low = det_point / vod
-    t_cal = 5 * max(t_det_up, t_det_low)
+    t_cal = 6 * max(t_det_up, t_det_low)
     dt = max(t_det_up, t_det_low) / M
 
     # --- Receiver grid ---
